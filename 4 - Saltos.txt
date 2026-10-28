@@ -1,0 +1,26 @@
+4 - Saltos
+
+; Nombre: Jesus Eduardo Diaz Gastelum
+; Docente: Jose Luis Medina Jimenez
+; Materia: Lenguajes de Interfaz
+; Horario: 10 - 11
+; Descripcion: Practica sencilla para ver como funcionan los saltos incondicionales y brincar lineas de codigo.
+
+
+INCLUDE Irvine32.inc
+.code
+main PROC
+    ; le metemos un 5 a eax
+    mov eax, 5
+    ; nos brincamos directo a la etiqueta de abajo
+    jmp continuar
+    ; esta instruccion se la brinca, no se ejecuta
+    mov eax, 10
+
+    continuar: 
+    ; imprimimos los registros para comprobar que se quedo en 5
+    call DumpRegs
+    exit 
+main ENDP
+
+END main
