@@ -1,0 +1,135 @@
+14 - Captura y Almacenamiento de Dato Numérico
+
+; Nombre: Jesus Eduardo Diaz Gastelum
+; Docente: Jose Luis Medina Jimenez
+; Materia: Lenguajes de Interfaz
+; Horario: 10 - 11
+; Descripcion: Lectura de unidades del usuario en formato texto, validacion de rango 1-99 y actualizacion del inventario actual.
+
+INCLUDE Irvine32.inc
+.data
+    mensajeEntrada BYTE "Cuantas unidades llegaron (1-99): ", 0
+    mensajeError BYTE "Entrada invalida. Escribe solo digitos, de 1 a 99.", 13, 10, 0
+    mensajeResultado BYTE "Existencia actual: ", 0
+    mensajeUnidades BYTE " unidades", 13, 10, 0
+
+
+    entrada BYTE 16 DUP(0)
+    salida BYTE 11 DUP(0)
+
+    cantidadRecibida DWORD ?
+    existenciaActual DWORD 25
+
+.code
+main PROC
+
+solicitarEntrada:
+    ; muestra el texto inicial para pedir el numero
+    mov edx, OFFSET mensajeEntrada
+    call WriteString
+
+   
+    mov edx, OFFSET entrada
+    mov ecx, SIZEOF entrada
+    call ReadString
+
+   
+    ; checa que la longitud leida no sea menor a 1 ni mayor a 2 caracteres
+    cmp eax, 1
+    jb entradaInvalida
+    cmp eax, 2
+    ja entradaInvalida
+
+    
+    mov esi, OFFSET entrada
+    mov ecx, eax
+    xor ebx, ebx
+
+convertirDigitos:
+    ; toma el caracter actual y comprueba si esta entre '0' y '9'
+    movzx eax, BYTE PTR [esi]
+    cmp al, '0'
+    jb entradaInvalida
+    cmp al, '9'
+    ja entradaInvalida
+
+    ; pasa el caracter de ASCII a entero y lo va acumulando
+    sub eax, '0'
+    imul ebx, ebx, 10
+    add ebx, eax
+
+    inc esi
+    loop convertirDigitos
+
+    
+    ; revisa que la cantidad final quede entre 1 y 99
+    cmp ebx, 1
+    jb entradaInvalida
+    cmp ebx, 99
+    ja entradaInvalida
+
+    mov cantidadRecibida, ebx
+
+    ; suma el monto ingresado al stock previo
+    mov eax, existenciaActual
+    add eax, cantidadRecibida
+    mov existenciaActual, eax
+
+    ; convierte el total actualizado a texto para imprimir
+    mov eax, existenciaActual
+    mov edi, OFFSET salida
+    call DwordToString
+
+    ; despliega los mensajes de salida con la nueva cantidad
+    mov edx, OFFSET mensajeResultado
+    call WriteString
+    mov edx, OFFSET salida
+    call WriteString
+    mov edx, OFFSET mensajeUnidades
+    call WriteString
+
+    exit
+
+entradaInvalida:
+    ; mensaje de error y regresa a pedir de nuevo la entrada
+    mov edx, OFFSET mensajeError
+    call WriteString
+    jmp solicitarEntrada
+
+main ENDP
+
+DwordToString PROC USES eax ebx ecx edx edi
+    mov ebx, 10
+    xor ecx, ecx
+
+    cmp eax, 0
+    jne dividirNumero
+    ; si vale cero escribe '0' directamente en el buffer
+    mov BYTE PTR [edi], '0'
+    inc edi
+    jmp terminarCadena
+
+dividirNumero:
+    ; limpia edx para dividir entre 10 y guarda los residuos en la pila
+    xor edx, edx
+    div ebx
+    push edx
+    inc ecx
+    test eax, eax
+    jnz dividirNumero
+
+escribirDigitos:
+    ; recupera los residuos y los transforma a caracteres ASCII
+    pop edx
+    add dl, '0'
+    mov BYTE PTR [edi], dl
+    inc edi
+    loop escribirDigitos
+
+terminarCadena:
+    ; cierra la cadena con un valor nulo
+    mov BYTE PTR [edi], 0
+    ret
+DwordToString ENDP
+
+END main

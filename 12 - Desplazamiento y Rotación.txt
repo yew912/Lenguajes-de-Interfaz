@@ -1,0 +1,99 @@
+12 - Desplazamiento y Rotación
+
+; Nombre: Jesus Eduardo Diaz Gastelum
+; Docente: Jose Luis Medina Jimenez
+; Materia: Lenguajes de Interfaz
+; Horario: 10 - 11
+; Descripcion: Practica sobre como funcionan las instrucciones de desplazamiento (SHL, SHR, SAR) y rotacion de bits (ROL, ROR, RCL, RCR).
+
+INCLUDE Irvine32.inc
+.data
+.code
+main PROC
+
+    mov eax, 0
+
+; 1 - SHL: Desplazamieto de un bit hacia a la izquierda
+    mov al, 10000010b
+    shl al, 1
+    movzx eax, al
+    call WriteBin
+    call Crlf
+
+    
+; 2 - SHR: Desplazamiento de un bit hacia la derecha
+    mov eax, 0
+    mov al, 00001001b
+    shr al, 1
+    movzx eax, al
+    call WriteBin
+    call Crlf
+
+
+; 3 - Desplazamiento con signo
+    mov eax, 0
+    mov al, -8
+    sar al, 1
+    movsx eax, al
+    call WriteBin
+    call Crlf
+
+; 4 - Desplazamiento con constante
+    mov eax, 0
+    mov al, 00001100b
+    shl al, 2
+    movzx eax, al
+    call WriteBin
+    call Crlf
+
+; 5 - Desplazamiento con cl
+    mov eax, 0
+    mov al, 00010100b
+    mov cl, 2
+    shr al, cl
+    movzx eax, al
+    call WriteBin
+    call Crlf
+
+; ROL, ROR, RCL, RCR
+;10000001b
+; clc limpia los flags
+; 6 - Rotacion a la izquierda
+    mov eax, 0
+    mov al, 10000001b
+    rol al, 1
+    ; pasa al a eax rellenando los bits de la izquierda con ceros
+    movzx eax, al
+    call WriteBin
+    call Crlf
+
+; 7 - Rotacion a la derecha
+    mov eax, 0
+    mov al, 10000001b
+    ; mueve los bits a la derecha un lugar y el ultimo lo pasa al frente
+    ror al, 1
+    movzx eax, al
+    call WriteBin
+    call Crlf
+
+    mov eax, 0
+    mov al, 10000001b
+    clc
+    ; rotacion a la izquierda tomando en cuenta la bandera de acarreo
+    rcl al, 1
+    movzx eax, al
+    call WriteBin
+    call Crlf
+
+    mov eax, 0
+    mov al, 10000001b
+    clc
+    ; rotacion a la derecha metiendo el bit previo del carry
+    rcr al, 1
+    movzx eax, al
+    call WriteBin
+    call Crlf
+
+    exit
+main ENDP
+END main

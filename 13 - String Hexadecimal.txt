@@ -1,0 +1,40 @@
+13 - String Hexadecimal
+
+; Nombre: Jesus Eduardo Diaz Gastelum
+; Docente: Jose Luis Medina Jimenez
+; Materia: Lenguajes de Interfaz
+; Horario: 10 - 11
+; Descripcion: Impresion manual de un numero en hexadecimal sacando nibble por nibble y convirtiendo a caracter ASCII.
+
+INCLUDE Irvine32.inc
+.code
+main PROC
+    mov eax, 12AB34CDh
+    mov ecx, 8
+
+ciclo:
+    mov edx, eax
+    shr edx, 28     ; manda los 4 bits mas altos a la derecha
+    and edx, 0Fh    ; aisla ese nibble
+    cmp edx, 9
+    jbe esDigito
+    add edx, 'A' - 10   ; ajusta para las letras A-F
+    jmp mostrar
+
+esDigito:
+    add edx, '0'    ; convierte el digito de 0-9 a ASCII
+
+mostrar:
+    push eax 
+    push ecx    ; guardamos eax y ecx para que no se pierdan con WriteChar
+    mov al, dl
+    call WriteChar ; imprime la letra o numero en pantalla
+    pop ecx
+    pop eax
+    shl eax, 4      ; recorre los bits para tomar el siguiente nibble
+    loop ciclo
+
+    call Crlf
+    exit
+main ENDP
+END main

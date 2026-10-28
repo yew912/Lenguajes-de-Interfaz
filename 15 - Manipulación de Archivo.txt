@@ -1,0 +1,60 @@
+15 - Manipulación de Archivo
+
+
+; Descripcion: Creacion de un archivo de texto, escritura de datos y manejo de errores con la libreria Irvine32.
+
+INCLUDE Irvine32.inc
+.data
+    nombreArchivo BYTE "Inventario.txt", 0 ; nombre del archivo a generar
+    texto BYTE "125",  0 ; cadena a escribir en el archivo
+    archivoHandle DWORD ? ; variable para almacenar el identificador del archivo
+
+    mensajeExito BYTE "Positivo", 0 ; aviso si se completa todo bien
+    mensajeError BYTE "Negativo", 0 ; aviso si ocurre alguna falla
+
+.code
+main PROC
+    ; 1- Crear Archivo txt
+    mov edx, OFFSET nombreArchivo  ; direccion con el nombre del archivo
+    call CreateOutputFile   ; genera o sobrescribe el archivo en disco
+
+    cmp eax, INVALID_HANDLE_VALUE  ; revisa si la creacion fallo
+    je error ; si marco error se salta
+
+    mov archivoHandle, eax ; guardamos el handle recibido en memoria
+
+    ; 2- Escribir caracteres en archivo txt.
+    mov eax, archivoHandle ; recargamos el handle por seguridad
+    mov edx, OFFSET texto   ; puntero al buffer con el texto
+    mov ecx, SIZEOF texto - 1   ; cantidad de bytes sin el caracter nulo
+    call WriteToFile    ; guarda los datos dentro del archivo
+
+    jc errorEscritura ; verifica la bandera de acarreo por si fallo la escritura
+
+    cmp eax, SIZEOF texto - 1   ; comprueba que se hayan escrito todos los bytes
+    jne errorEscritura  ; salta si no se escribieron completos
+
+
+    ; 3- Cerrar archivo txt
+    mov eax, archivoHandle  ; recupera el identificador del archivo
+    call CloseFile  ; libera el archivo
+
+    test eax, eax   ; valida la respuesta al cerrar el archivo
+    jz error    ; salta si devolvio cero
+
+    mov edx, OFFSET mensajeExito    ; imprime aviso de exito
+    call WriteString
+    jmp fin
+
+   errorEscritura:
+    mov eax, archivoHandle
+    call CloseFile
+    mov edx , OFFSET mensajeError
+    call WriteString
+   error:
+    mov edx , OFFSET mensajeError
+    call WriteString
+   fin: 
+    exit
+main ENDP
+END main

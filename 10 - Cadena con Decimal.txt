@@ -1,0 +1,159 @@
+10 - Cadena con Decimal
+
+; Nombre: Jesus Eduardo Diaz Gastelum
+; Docente: Jose Luis Medina Jimenez
+; Materia: Lenguajes de Interfaz
+; Horario: 10 - 11
+; Descripcion: Calculo de avance de descarga y conversion manual de valores a cadenas impresas en pantalla.
+
+INCLUDE Irvine32.inc
+
+.data
+tmArchivo DWORD 100000 
+NumBloques DWORD 125
+tmBloque DWORD 512
+tmGrupo DWORD 1024
+
+bytesDescargados DWORD ?    ; variable no inicializada
+bytesPendientes DWORD ?
+porcentaje DWORD ?
+residuo DWORD ?
+grupos DWORD ?
+
+msgDescargados BYTE "Bytes descargados: ", 0
+msgPendientes BYTE "Bytes pendientes: ", 0
+msgPorcentaje BYTE "Porcentaje de avance: ", 0
+msgGrupos BYTE "Grupos completos de 1024 bytes: ", 0
+msgResiduo BYTE "Residuo: ", 0
+msgPorcentajeFinal BYTE "%", 0
+buffer BYTE 11 DUP(0)
+
+.code
+main PROC
+    ; saca los bytes descargados multiplicando bloques por el tamaño de bloque
+    mov eax, NumBloques
+    mul tmBloque
+    mov bytesDescargados, eax
+
+    ; resta lo descargado al total para obtener lo que falta
+    mov eax, tmArchivo
+    sub eax, bytesDescargados
+    mov bytesPendientes, eax
+
+    ; saca el porcentaje multiplicando por 100 y dividiendo entre el total
+    mov eax, bytesDescargados
+    mov ebx, 100
+    mul ebx
+    div tmArchivo
+    mov porcentaje, eax
+
+    ; calcula los grupos de 1024 y lo que sobra
+    xor edx, edx
+    mov eax, bytesDescargados
+    div tmGrupo
+    mov grupos, eax
+    mov residuo, edx
+
+    ; imprime los bytes que van descargados
+    mov edx, OFFSET msgDescargados
+    call WriteString
+    mov eax, bytesDescargados
+    ; convierte a texto y muestra
+    mov esi, OFFSET buffer
+    call convertirDecimal
+    mov edx, OFFSET buffer
+    call WriteString
+    call Crlf
+
+    ; imprime los bytes pendientes
+    mov edx, OFFSET msgPendientes
+    call WriteString
+    mov eax, bytesPendientes
+    mov esi, OFFSET buffer
+    call convertirDecimal
+    mov edx, OFFSET buffer
+    call WriteString
+    call Crlf
+
+    ; imprime el porcentaje
+    mov edx, OFFSET msgPorcentaje
+    call WriteString
+    mov eax, porcentaje
+    mov esi, OFFSET buffer
+    call convertirDecimal
+    mov edx, OFFSET buffer
+    call WriteString
+    mov edx, OFFSET msgPorcentajeFinal
+    call WriteString
+    call Crlf
+
+    ; imprime los grupos completos
+    mov edx, OFFSET msgGrupos
+    call WriteString
+    mov eax, grupos
+    mov esi, OFFSET buffer
+    call convertirDecimal
+    mov edx, OFFSET buffer
+    call WriteString
+    call Crlf
+
+    ; imprime el sobrante
+    mov edx, OFFSET msgResiduo
+    call WriteString
+    mov eax, residuo
+    mov esi, OFFSET buffer
+    call convertirDecimal
+    mov edx, OFFSET buffer
+    call WriteString
+    call Crlf
+
+    exit
+main ENDP
+
+; procedimiento para transformar numero a string decimal
+convertirDecimal PROC USES ebx ecx edx edi
+    ; pasa el puntero de esi a edi para ir llenando la cadena
+    mov edi, esi
+    ; divisor constante 10
+    mov ebx, 10
+    ; contador de caracteres
+    xor ecx, ecx
+    cmp eax, 0
+    jne dividirNumero
+    ; si es cero mete directamente el caracter '0'
+    mov BYTE PTR [edi], '0'
+    ; avanza la posicion
+    inc edi
+    ; salta al cierre de la cadena
+    jmp terminarCadena
+
+dividirNumero:
+    ; limpia edx para evitar desbordamiento al dividir
+    xor edx, edx
+    div ebx
+    ; mete el residuo a la pila
+    push edx
+    ; cuenta un digito mas
+    inc ecx
+    ; valida si todavia queda numero por dividir
+    test eax, eax
+    ; repite si eax no es 0
+    jnz dividirNumero
+
+escribirDigitos:
+    ; saca de la pila el numero
+    pop edx
+    ; ajusta a codigo ASCII
+    add dl, '0'
+    ; guarda el caracter en la cadena
+    mov BYTE PTR [edi], dl
+    inc edi
+    loop escribirDigitos
+
+terminarCadena:
+    ; coloca el nulo final
+    mov BYTE PTR [edi], 0
+    ret
+convertirDecimal ENDP
+
+END main
