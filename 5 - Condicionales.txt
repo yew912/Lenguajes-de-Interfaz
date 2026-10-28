@@ -1,0 +1,48 @@
+5 - Condicionales
+
+; Nombre: Jesus Eduardo Diaz Gastelum
+; Docente: Jose Luis Medina Jimenez
+; Materia: Lenguajes de Interfaz
+; Horario: 10 - 11
+; Descripcion: Como hacer ciclos while y do while en ensamblador usando comparaciones y saltos condicionales.
+
+INCLUDE Irvine32.inc
+.data
+.code
+main PROC
+    ; usamos ebx como nuestro contador
+    mov ebx, 1
+
+cicloWhile:
+    ; checa si ya nos pasamos de 100 para salirse
+    cmp ebx, 100 
+    jg fin 
+    ; si no ha llegado a 100 imprime el numero actual
+    mov eax, ebx
+    call WriteDec 
+    call Crlf 
+
+    ; le suma 1 al contador
+    inc ebx 
+    ; regresa arriba a checar la condicion
+    jmp cicloWhile 
+
+fin:
+    call Crlf 
+    ; reiniciamos el contador a 1 para el do while
+    mov ebx, 1 
+cicloDoWhile:
+    ; en el do while primero imprime el valor
+    mov eax, ebx 
+    call WriteDec 
+    call Crlf 
+    ; le suma 1 al contador
+    inc ebx
+    ; hasta al final revisa si sigue siendo menor o igual a 100
+    cmp ebx, 100 
+    ; si todavia no pasa de 100 repite el ciclo
+    jle cicloDoWhile 
+    exit 
+main ENDP
+
+END main

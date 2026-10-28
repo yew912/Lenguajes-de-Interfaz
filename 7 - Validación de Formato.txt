@@ -1,0 +1,93 @@
+7 - Validación de Formato
+
+; Nombre: Jesus Eduardo Diaz Gastelum
+; Docente: Jose Luis Medina Jimenez
+; Materia: Lenguajes de Interfaz
+; Horario: 10 - 11
+; Descripcion: Validacion de una cadena de texto para comprobar que tenga el formato de 3 letras, guion y 3 numeros.
+
+INCLUDE Irvine32.inc
+
+.data
+    prompt BYTE "Ingresa el codigo (ej. TEC-123): ", 0
+    msg_valido BYTE "Formato valido. La cadena cumple todas las reglas.", 13, 10, 0
+    
+    err_longitud BYTE "Formato invalido: La longitud no es igual a 7.", 13, 10, 0
+    err_letras   BYTE "Formato invalido: Las posiciones 0-2 no son letras mayusculas (A-Z).", 13, 10, 0
+    err_guion    BYTE "Formato invalido: Falta el separador '-' en la posicion 3.", 13, 10, 0
+    err_digitos  BYTE "Formato invalido: Las posiciones 4-6 no son digitos (0-9).", 13, 10, 0
+    
+    buffer BYTE 20 DUP(0)
+    bytesLeidos DWORD ?
+
+.code
+main PROC
+    ; pedir la cadena al usuario
+    mov edx, OFFSET prompt
+    call WriteString
+    mov edx, OFFSET buffer
+    mov ecx, SIZEOF buffer
+    call ReadString
+    mov bytesLeidos, eax
+
+    ; revisar que tenga los 7 caracteres exactos
+    cmp eax, 7        
+    ; si no mide 7 se va al error de tamaño      
+    jne error_longitud    
+    ; guardamos la direccion del buffer en esi
+    mov esi, OFFSET buffer
+    ; ciclo para verificar las 3 letras de inicio
+    mov ecx, 3              
+validar_letras:
+    mov al, [esi]          
+    cmp al, 'A'
+    ; si esta antes de la 'A' da error
+    jb error_letras        
+    cmp al, 'Z'
+    ; si esta despues de la 'Z' da error
+    ja error_letras        
+    inc esi                
+    loop validar_letras    
+
+    ; revisar el guion medio en medio
+    mov al, [esi]          
+    cmp al, '-'
+    ; si no hay guion manda error
+    jne error_guion        
+    inc esi                
+    ; ciclo para revisar los 3 numeros finales
+    mov ecx, 3              
+validar_digitos:
+    mov al, [esi]          
+    cmp al, '0'
+    jb error_digitos      
+    ; si es menor a '0' da error
+    cmp al, '9'
+    ; si es mayor a '9' da error
+    ja error_digitos       
+    inc esi                
+    loop validar_digitos   
+    ; si paso todas las revisiones esta bien
+    mov edx, OFFSET msg_valido
+    call WriteString
+    jmp fin                
+    ; manejo de mensajes de error
+error_longitud:
+    mov edx, OFFSET err_longitud
+    call WriteString
+    jmp fin
+error_letras:
+    mov edx, OFFSET err_letras
+    call WriteString
+    jmp fin
+error_guion:
+    mov edx, OFFSET err_guion
+    call WriteString
+    jmp fin
+error_digitos:
+    mov edx, OFFSET err_digitos
+    call WriteString
+fin:
+    exit
+main ENDP
+END main

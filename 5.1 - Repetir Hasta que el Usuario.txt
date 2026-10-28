@@ -1,0 +1,35 @@
+5.1 - Repetir Hasta que el Usuario Ingrese 0
+
+; Nombre: Jesus Eduardo Diaz Gastelum
+; Docente: Jose Luis Medina Jimenez
+; Materia: Lenguajes de Interfaz
+; Horario: 10 - 11
+; Descripciones: Programa que repite la lectura de numeros hasta que el usuario ingresa un cero para terminar.
+
+INCLUDE Irvine32.inc
+
+.data
+msg BYTE "Ingrese un numero (0 para salir): ", 0
+
+.code
+main PROC
+
+bucle:
+    ; mostramos el mensaje y pedimos el dato
+    mov edx, OFFSET msg
+    call WriteString
+    call ReadInt
+
+    ; si meten un 0 nos vamos a salir
+    cmp eax, 0
+    je salir
+
+    ; si es diferente de 0 imprime el numero y se repite
+    call WriteInt
+    call Crlf
+    jmp bucle
+
+salir:
+    exit
+main ENDP
+END main

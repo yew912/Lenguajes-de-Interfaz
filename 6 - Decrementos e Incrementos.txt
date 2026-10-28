@@ -1,0 +1,73 @@
+6 - Decrementos e Incrementos
+
+; Nombre: Jesus Eduardo Diaz Gastelum
+; Docente: Jose Luis Medina Jimenez
+; Materia: Lenguajes de Interfaz
+; Horario: 10 - 11
+; Descripcion: Uso de la instruccion DEC para restar intentos en un login hasta que se ponga el PIN bien o se bloquee.
+
+INCLUDE Irvine32.inc
+
+.data 
+    msgPIN BYTE "Ingrese la clave: ",0
+    msgError BYTE "Clave Incorrecta.",0
+    msgAcceso BYTE "Acceso permitido",0
+    msgBloqueo BYTE "Sistema Bloqueado",0
+    msgIntentos BYTE "Intentos restantes: ",0
+
+    claveCorrecta = 1234
+
+.code
+main PROC
+    ; usamos ebx como nuestro contador de vidas/intentos
+    mov ebx, 3 
+
+    pedirPIN:
+    ; pide la contraseña al usuario
+    mov edx, OFFSET msgPIN
+    call WriteString 
+    call ReadInt 
+
+    ; revisamos si le atino al PIN
+    cmp eax, claveCorrecta
+    je acceso 
+
+    ; si fallo imprime el error
+    mov edx, OFFSET msgError 
+    call WriteString
+    call crlf
+
+    ; le quitamos un intento
+    dec ebx 
+
+    ; si la resta dio cero se brinca al bloqueo
+    jz bloqueado
+
+    ; muestra cuantos intentos le quedan
+    mov edx, OFFSET msgIntentos
+    call WriteString
+
+    mov eax, ebx
+    call WriteDec
+    call crlf
+
+    ; regresa a pedir el PIN de nuevo
+    jmp pedirPIN
+
+acceso:
+    ; entra aqui si el PIN fue correcto
+    mov edx, OFFSET msgAcceso
+    call WriteString
+    jmp salir
+
+bloqueado:
+    ; entra aqui si se le acabaron los intentos
+    mov edx, OFFSET msgBloqueo
+    call WriteString
+    jmp salir
+
+salir:
+    exit 
+main ENDP
+
+END main
