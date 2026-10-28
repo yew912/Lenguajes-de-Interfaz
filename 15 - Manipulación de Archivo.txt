@@ -1,6 +1,9 @@
 15 - Manipulación de Archivo
 
-
+; Nombre: Jesus Eduardo Diaz Gastelum
+; Docente: Jose Luis Medina Jimenez
+; Materia: Lenguajes de Interfaz
+; Horario: 10 - 11
 ; Descripcion: Creacion de un archivo de texto, escritura de datos y manejo de errores con la libreria Irvine32.
 
 INCLUDE Irvine32.inc
